@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "CatetAja",
     short_name: "CatetAja",
     description: "Aplikasi catatan pengeluaran bareng yang simple dan playful.",
-    start_url: "/",
+    start_url: "/login",
     display: "standalone",
     background_color: "#FFF7ED",
     theme_color: "#00c29f",

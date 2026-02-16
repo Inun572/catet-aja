@@ -26,8 +26,6 @@ export async function proxy(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  console.log("🔥 USER IN PROXY:", req.cookies.getAll())
-
   const isDashboard = req.nextUrl.pathname.startsWith("/dashboard")
   const isLogin = req.nextUrl.pathname.startsWith("/login")
 

@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+
+datasource db {
+  provider = "postgresql"
+}
+
+//////////////////////
+// ENUMS
+//////////////////////
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+//////////////////////
+// USERS
+//////////////////////
+
+model User {
+  id        String   @id
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  memberships Membership[]
+
+  @@map("users")
+}
+
+//////////////////////
+// ORGANIZATIONS
+//////////////////////
+
+model Organization {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  memberships Membership[]
+  records     FinancialRecord[]
+  categories  Category[]
+
+  @@map("organizations")
+}
+
+//////////////////////
+// MEMBERSHIPS
+//////////////////////
+
+model Membership {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  organizationId String   @map("organization_id")
+  role           Role
+  createdAt      DateTime @default(now()) @map("created_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  user         User         @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@unique([userId, organizationId])
+  @@map("memberships")
+}
+
+//////////////////////
+// FINANCIAL RECORDS
+//////////////////////
+
+model FinancialRecord {
+  id             String    @id @default(uuid())
+  name           String
+  organizationId String    @map("organization_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  transactions  Transaction[]
+
+  @@map("financial_records")
+}
+
+//////////////////////
+// CATEGORIES
+//////////////////////
+
+model Category {
+  id             String    @id @default(uuid())
+  name           String
+  color          String?   // example: "#22c55e"
+  icon           String?   // example: "wallet"
+  organizationId String    @map("organization_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  deletedAt      DateTime? @map("deleted_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id])
+  transactions  Transaction[]
+
+  @@unique([name, organizationId])
+  @@map("categories")
+}
+
+//////////////////////
+// TRANSACTIONS
+//////////////////////
+
+model Transaction {
+  id         String    @id @default(uuid())
+  recordId   String    @map("record_id")
+  categoryId String?   @map("category_id")
+  amount     Float
+  note       String?
+  type       TransactionType
+  createdAt  DateTime  @default(now()) @map("created_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  record   FinancialRecord @relation(fields: [recordId], references: [id])
+  category Category?       @relation(fields: [categoryId], references: [id])
+
+  @@map("transactions")
+}
